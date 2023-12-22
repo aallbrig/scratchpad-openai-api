@@ -211,6 +211,15 @@ function main() {
       "size": "1024x1024"
     }'
 
+  curl https://api.openai.com/v1/images/generations \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $OPENAI_API_KEY" \
+    -d '{
+      "model": "dall-e-3",
+      "prompt": "A stylized digital painterly painting of Roy Batty (a replicant) from Ridley Scotts film Blade Runner during the tears in rain speech but actually he is a programmer with cat ear headphones and a hoodie in a dramatic pose overlooking a futuristic cityscape with a neon glow of yellow, green, pink, and purple.",
+      "n": 1,
+      "size": "1024x1024"
+    }'
 
   curl -X POST 'https://api.openai.com/v1/chat/completions' \
     -H 'Content-Type: application/json' \

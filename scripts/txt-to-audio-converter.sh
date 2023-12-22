@@ -7,8 +7,6 @@ FILES=()
 AUDIO_FILES=()
 
 function parse_args() {
-  echo "debug: args: $@"
-  echo "count: $#"
   while [[ $# -gt 0 ]]; do
     case "$1" in
       -v|--voice)
@@ -23,7 +21,9 @@ function parse_args() {
         ;;
       -*|--*)
         echo "Unknown option: $1"
-        help
+        echo
+        usage
+        exit 1
         ;;
       *)
         echo "debug: file found: $1"
@@ -32,19 +32,14 @@ function parse_args() {
         ;;
     esac
   done
-  echo "Final voice: $VOICE"
-  echo "Final speed: $SPEED"
-  echo "Files to process: ${FILES[@]}"
 }
 
-
-
-function help() {
+function usage() {
   echo "$0 --voice [voice] --speed [speed] [files...]"
   echo "  --voice [voice]  Voice to use for audio conversion"
   echo "  --speed [speed]  Speed at which to read the text"
   echo "  [files...]       Text files seperated by spaces to convert to audio"
-  exit 1
+  echo
 }
 
 function convert_line_to_audio() {
@@ -65,54 +60,53 @@ function convert_line_to_audio() {
     --output "$audio_filename"
 }
 
-  function convert_to_audio() {
-    local file="$1"
-    local voice="$2"
-    local speed="$3"
-    local filename="${file%.*}"
-    local line_index=0
-    local filter_complex_string=""
+function convert_to_audio() {
+  local file="$1"
+  local voice="$2"
+  local speed="$3"
+  local filename="${file%.*}"
+  local line_index=0
+  local filter_complex_string=""
 
-    while IFS= read -r line || [ -n "$line" ]; do
-      if [[ -z "$line" ]]; then
-        continue
-      fi
-
-      local audio_file="${filename}_${line_index}.mp3"
-      convert_line_to_audio "$line" "$voice" "$speed" "$audio_file"
-      AUDIO_FILES+=("$audio_file") # Collect the generated audio files
-
-      filter_complex_string+="[${line_index}:a]atrim=duration=0.5[silence${line_index}];"
-      filter_complex_string+="[${line_index}:a][silence${line_index}]concat[audio${line_index}];"
-      line_index=$((line_index + 1))
-    done < "$file"
-
-    silence_duration=0.5  # Duration of silence in seconds
-    silence_file="silence.mp3"
-
-    # Create a silent audio file of the specified duration
-    if [ ! -f "$silence_file" ]; then
-        ffmpeg -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=44100 -t "$silence_duration" "$silence_file"
+  while IFS= read -r line || [ -n "$line" ]; do
+    # skip blank lines
+    if [[ -z "$line" ]]; then
+      continue
     fi
 
-    filter_complex_parts=()
-    for index in "${!AUDIO_FILES[@]}"; do
-        # For each audio file, specify that it should be followed by silence
-        filter_complex_parts+=("[${index}:a][${#AUDIO_FILES[@]}:a]")  # Join audio file and silence
-    done
+    local audio_file="${filename}_${line_index}.mp3"
+    convert_line_to_audio "$line" "$voice" "$speed" "$audio_file"
+    AUDIO_FILES+=("$audio_file") # Collect the generated audio files
 
-    # Build the filter_complex string
-    filter_complex_string="${filter_complex_parts[*]}concat=n=$((2 * ${#AUDIO_FILES[@]})):v=0:a=1[outa]"
+    filter_complex_string+="[${line_index}:a]atrim=duration=0.5[silence${line_index}];"
+    filter_complex_string+="[${line_index}:a][silence${line_index}]concat[audio${line_index}];"
 
-    # Add all the input files to the ffmpeg command
-    ffmpeg_inputs=""
-    for audio_file in "${AUDIO_FILES[@]}"; do
-        ffmpeg_inputs+="-i $audio_file "
-    done
-    # Add the silence file once because it will be reused
-    ffmpeg_inputs+="-i $silence_file "
+    line_index=$((line_index + 1))
+  done < "$file"
 
-    ffmpeg $ffmpeg_inputs -filter_complex "$filter_complex_string" -map "[outa]" "${filename}-complete.mp3"
+  silence_duration=0.5
+  silence_file="silence.mp3"
+
+  if [ ! -f "$silence_file" ]; then
+      ffmpeg -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=44100 -t "$silence_duration" "$silence_file"
+  fi
+
+  filter_complex_parts=()
+  for index in "${!AUDIO_FILES[@]}"; do
+      # For each audio file, specify that it should be followed by silence
+      filter_complex_parts+=("[${index}:a][${#AUDIO_FILES[@]}:a]")
+  done
+
+  filter_complex_string="${filter_complex_parts[*]}concat=n=$((2 * ${#AUDIO_FILES[@]})):v=0:a=1[outa]"
+
+  ffmpeg_inputs=""
+  for audio_file in "${AUDIO_FILES[@]}"; do
+      ffmpeg_inputs+="-i $audio_file "
+  done
+  # Add the silence file too
+  ffmpeg_inputs+="-i $silence_file "
+
+  ffmpeg $ffmpeg_inputs -filter_complex "$filter_complex_string" -map "[outa]" "${filename}-complete.mp3"
 }
 
 function main() {

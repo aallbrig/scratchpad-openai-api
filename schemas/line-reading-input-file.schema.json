@@ -11,9 +11,10 @@
             "type": "string",
             "description": "The name of the character."
           },
-          "character_voice_actor": {
+          "voice_actor": {
             "type": "string",
             "enum": ["alloy", "echo", "fable", "onyx", "nova", "shimmer"],
+            "default": "alloy",
             "description": "The voice actor for the character."
           },
           "character_motivation": {
@@ -47,7 +48,7 @@
             "description": "The speed at which the line should be read."
           }
         },
-        "required": ["line"],
+        "required": ["line", "character_name"],
         "additionalProperties": false
       }
     }
