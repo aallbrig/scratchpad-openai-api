@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "concept": {
+        "type": "string",
+        "description": "A description of the art concept."
+      },
+      "art_model": {
+        "type": "string",
+        "enum": ["dall-e-2", "dall-e-3"],
+        "default": "dall-e-2",
+        "description": "The AI model used for the art generation."
+      },
+      "variations": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 10,
+        "default": 1,
+        "description": "Number of variations to generate, between 1 and 10."
+      },
+      "image_quality": {
+        "type": "string",
+        "enum": ["standard", "hd"],
+        "default": "standard",
+        "description": "The quality of the generated image."
+      },
+      "image_size": {
+        "type": "string",
+        "enum": ["256x256", "512x512", "1024x1024", "1792x1024", "1024x1792"],
+        "description": "The size of the generated image. Certain sizes are only supported by specific art models."
+      },
+      "image_style": {
+        "type": "string",
+        "enum": ["vivid", "natural"],
+        "description": "The style of the generated image. Only supported with dall-e-3."
+      }
+    },
+    "required": ["concept"],
+    "additionalProperties": false,
+    "dependencies": {
+      "image_size": {
+        "oneOf": [
+          {
+            "properties": {
+              "art_model": {"const": "dall-e-2"},
+              "image_size": {"enum": ["256x256", "512x512", "1024x1024"]}
+            }
+          },
+          {
+            "properties": {
+              "art_model": {"const": "dall-e-3"},
+              "image_size": {"enum": ["1024x1024", "1792x1024", "1024x1792"]}
+            }
+          }
+        ]
+      },
+      "image_style": {
+        "properties": {
+          "art_model": {"const": "dall-e-3"}
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,38 @@
+characters:
+  - character_name: Judge
+    voice_actor: onyx
+  - character_name: Prosecutor
+    voice_actor: fable
+  - character_name: Defendant
+    voice_actor: echo
+  - character_name: Defense Lawyer
+    voice_actor: shimmer
+lines:
+  - line: Your Honor, for the sake of truth, we agree to use the lasso of truth on my client.
+    character_name: Defense Lawyer
+  - line: Very well.  Bailiff, bring in the lasso of truth.
+    character_name: Judge
+  - line: Now... Did you or did you not take the money from the safe on July 15th?
+    character_name: Prosecutor
+  - line: I did not 'take' the money... I merely shifted its location.
+    character_name: Defendant
+  - line: Technically... he's not lying.
+    character_name: Defense Lawyer
+  - line: Let's be clear here... Did you remove the money from the safe with the intention of permanently depriving the owner?
+    character_name: Judge
+  - line: I intended to deprive it... temporarily. Permanent is such a strong word.
+    character_name: Defendant
+  - line: Alright, did you leave the building with the money?
+    character_name: Prosecutor
+  - line: Define 'leave'... I moved through a doorway, sure.
+    character_name: Defendant
+  - line: Did you end up outside the building with the money in your possession?
+    character_name: Prosecutor
+  - line: Oh, I never said it was in my 'possession'... It was accompanying me, much like a pet.
+    character_name: Defendant
+  - line: This is absurd!
+    character_name: Prosecutor
+  - line: But not untruthful.
+    character_name: Defense Lawyer
+  - line: Court adjourned... We need to rethink our questioning strategy.
+    character_name: Judge

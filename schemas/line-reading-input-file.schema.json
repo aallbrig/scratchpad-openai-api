@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "characters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "character_name": {
+            "type": "string",
+            "description": "The name of the character."
+          },
+          "character_voice_actor": {
+            "type": "string",
+            "enum": ["alloy", "echo", "fable", "onyx", "nova", "shimmer"],
+            "description": "The voice actor for the character."
+          },
+          "character_motivation": {
+            "type": "string",
+            "description": "Directorial notes for the character (aka motivation)."
+          }
+        },
+        "required": ["character_name"],
+        "additionalProperties": false
+      },
+      "uniqueItems": true
+    },
+    "lines": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "character_name": {
+            "type": "string",
+            "description": "The name of the character who delivers the line."
+          },
+          "line": {
+            "type": "string",
+            "description": "The line of dialogue."
+          },
+          "line_read_speed": {
+            "type": "number",
+            "default": 1.0,
+            "minimum": 0.25,
+            "maximum": 4.0,
+            "description": "The speed at which the line should be read."
+          }
+        },
+        "required": ["line"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["characters", "lines"],
+  "additionalProperties": false
+}
