@@ -1,10 +1,51 @@
 #!/usr/bin/env bash
-set -x
+# set -x
 
 SCRIPT_DIR=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
 LINE_READING_SCHEMA="$SCRIPT_DIR/../schemas/line-reading-input-file.schema.json"
 INPUT_FILES=()
 OUTPUT_FILES=()
+
+# tables
+declare -A column_max_lengths
+column_max_lengths[character]=0
+column_max_lengths[voice_actor]=0
+column_max_lengths[line_read_speed]=0
+column_max_lengths[line]=0
+column_padding=8
+
+function print_table_header() {
+  printf "%-$((column_max_lengths[character] + $column_padding))s" "Character"
+  printf "%-$((column_max_lengths[line] + $column_padding))s" "Line"
+  printf "%-$((column_max_lengths[line_read_speed] + $column_padding))s" "Line Read Speed"
+  printf "%-$((column_max_lengths[voice_actor]))s\n" "Voice Actor"
+  local total_length=$(( column_max_lengths[character] + column_max_lengths[voice_actor] + column_max_lengths[line_read_speed] + column_max_lengths[line] + (column_padding * 3) ))
+  printf '=%.0s' $(seq 1 $total_length)
+  printf '\n'
+}
+function print_table_row() {
+  local character="$1"
+  local voice_actor="$2"
+  local line_read_speed="$3"
+  local line="$4"
+
+  printf "%-$((column_max_lengths[character] + $column_padding))s" "$character"
+  printf "%-$((column_max_lengths[line] + $column_padding))s" "$line"
+  printf "%-$((column_max_lengths[line_read_speed] + $column_padding))s" "$line_read_speed"
+  printf "%-$((column_max_lengths[voice_actor]))s\n" "$voice_actor"
+}
+function update_max_lengths() {
+    local character="$1"
+    local voice_actor="$2"
+    local line_read_speed="$3"
+    local line="$4"
+
+    [[ ${#character} -gt ${column_max_lengths[character]} ]] && column_max_lengths[character]=${#character}
+    [[ ${#voice_actor} -gt ${column_max_lengths[voice_actor]} ]] && column_max_lengths[voice_actor]=${#voice_actor}
+    [[ ${#line_read_speed} -gt ${column_max_lengths[line_read_speed]} ]] && column_max_lengths[line_read_speed]=${#line_read_speed}
+    [[ ${#line} -gt ${column_max_lengths[line]} ]] && column_max_lengths[line]=${#line}
+}
+# /tables
 
 function add_input_file() {
   local file="$1"
@@ -93,13 +134,45 @@ function normalize_input_file() {
   echo "$normalized"
 }
 
+function lookup_character_voice_actor() {
+  local character_name="$1"
+  local default_voice_actor="$2"
+  local input_file="$3"
+  local voice_actor=""
+
+  voice_actor=$(jq -r --arg character_name "$character_name" '.characters[] | select(.character_name == $character_name).voice_actor // empty' "$input_file")
+
+  # If no voice_actor is found, use the default
+  if [[ -z $voice_actor ]]; then
+    voice_actor="$default_voice_actor"
+  fi
+
+  echo "$voice_actor"
+}
+
+function prepare_for_table() {
+  local input_file="$1"
+  local -a lines
+
+  # include header row in max length calculation
+  update_max_lengths "Character" "Voice Actor" "Line Read Speed" "Line"
+
+  mapfile -t lines < <(jq -r '.lines[] | "\(.character_name)|\(.line)|\(.line_read_speed // 1.0)"' "$input_file")
+
+  for line_data in "${lines[@]}"; do
+      IFS='|' read -r character_name line line_read_speed <<< "$line_data"
+      voice_actor=$(lookup_character_voice_actor "$character_name" "$default_voice_actor" "$normalized_input_file_ref")
+      update_max_lengths "$character_name" "$voice_actor" "$line_read_speed" "$line"
+  done
+}
+
 function main() {
   check_json_schema_file "$LINE_READING_SCHEMA"
 
   parse_args "$@"
 
   if [[ ${#INPUT_FILES[@]} -eq 0 ]]; then
-    echo "error: no input files"
+    echo "error: no input files passed into script"
     help
     exit 1
   fi
@@ -107,15 +180,23 @@ function main() {
   for input_file in "${INPUT_FILES[@]}"; do
     echo "processing: $input_file"
     echo
-    normalized_input_file=$(normalize_input_file "$input_file")
+    normalized_input_file_ref=$(normalize_input_file "$input_file")
 
-    validate_json_with_json_schema "$LINE_READING_SCHEMA" "$normalized_input_file"
+    validate_json_with_json_schema "$LINE_READING_SCHEMA" "$normalized_input_file_ref"
     default_voice_actor=$(jq -r ".properties.characters.items.properties.voice_actor.default" "$LINE_READING_SCHEMA")
     default_line_read_speed=$(jq -r ".properties.lines.items.properties.line_read_speed.default" "$LINE_READING_SCHEMA")
 
-    jq -r '.lines[] | "\(.character_name)|\(.line)"' "$normalized_input_file" | while IFS="|" read -r character_name line; do
-      voice_actor=$(jq -r ".characters[] | select(.character_name == \"$character_name\") | .voice_actor" "$normalized_input_file")
-      echo "$character_name ($voice_actor): $line"
+    # serialized the JSON data into single line string, essentially for this script's processing
+    mapfile -t lines < <(jq --arg default_line_read_speed "$default_line_read_speed" -r '.lines[] | "\(.character_name)|\(.line)|\(.line_read_speed // $default_line_read_speed)"' "$normalized_input_file_ref")
+
+    echo "script:"
+    echo
+    prepare_for_table "$normalized_input_file_ref"
+    print_table_header
+    for line_data in "${lines[@]}"; do
+        IFS="|" read -r character_name line line_read_speed <<< "$line_data"
+        voice_actor=$(lookup_character_voice_actor "$character_name" "$default_voice_actor" "$normalized_input_file_ref")
+        print_table_row "$character_name" "$voice_actor" "$line_read_speed" "$line"
     done
   done
 }
