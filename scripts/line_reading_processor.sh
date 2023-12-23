@@ -90,6 +90,10 @@ function parse_args() {
         OUTPUT_DIRECTORY="$2"
         shift
         ;;
+      -h|--help)
+        help
+        exit 0
+        ;;
       -*|--*)
         echo "unknown option: $1"
         help
@@ -104,8 +108,10 @@ function parse_args() {
 }
 
 function help() {
-  echo "$0 [files...]"
-  echo "  [files...]       JSON or YAML files"
+  echo "$0 [-d output_directory] [files...]"
+  echo "  -h/--help                 Show this help message"
+  echo "  -d/--data-directory       Directory to output files to (default: $OUTPUT_DIRECTORY)"
+  echo "  [files...]                JSON or YAML files"
   echo
 }
 
