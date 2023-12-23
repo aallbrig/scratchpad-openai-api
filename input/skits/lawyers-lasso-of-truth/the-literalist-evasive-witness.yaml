@@ -1,3 +1,5 @@
+default_overrides:
+  line_read_speed: 1.22
 characters:
   - character_name: Judge
     voice_actor: onyx

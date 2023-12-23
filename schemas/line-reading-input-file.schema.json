@@ -2,6 +2,19 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
+    "default_overrides": {
+      "type": "object",
+      "properties": {
+        "line_read_speed": {
+          "type": "number",
+          "default": 1.0,
+          "minimum": 0.25,
+          "maximum": 4.0,
+          "description": "The default speed at which lines should be read."
+        }
+      },
+      "additionalProperties": false
+    },
     "characters": {
       "type": "array",
       "items": {
@@ -9,6 +22,7 @@
         "properties": {
           "character_name": {
             "type": "string",
+            "minLength": 1,
             "description": "The name of the character."
           },
           "voice_actor": {
@@ -34,10 +48,12 @@
         "properties": {
           "character_name": {
             "type": "string",
+            "minLength": 1,
             "description": "The name of the character who delivers the line."
           },
           "line": {
             "type": "string",
+            "minLength": 1,
             "description": "The line of dialogue."
           },
           "line_read_speed": {
