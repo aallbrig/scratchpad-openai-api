@@ -1,0 +1,6 @@
+characters:
+  - character_name: Narrator
+    voice_actor: fable
+lines:
+  - line: "Single line test"
+    character_name: Narrator
