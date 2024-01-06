@@ -188,7 +188,7 @@ function main() {
     -H "Authorization: Bearer $OPENAI_API_KEY" \
     -d '{
       "model": "dall-e-3",
-      "prompt": "An imaginative and whimsical illustration of a vast land named Worksheet, depicted as a medieval kingdom in disarray with numbers, text, and data symbols scattered chaotically across the landscape. The setting should have a magical, yet disorganized feel, blending elements of a fantasy world with data analytics imagery, like charts and graphs lying around in a haphazard manner. The color palette should be vibrant, emphasizing the chaos and confusion in the kingdom.",
+      "prompt": "An imaginative and whimsical illustration of a vast land named Worksheet, depicted as a medieval kingdom in disarray with numbers, text, and assets symbols scattered chaotically across the landscape. The setting should have a magical, yet disorganized feel, blending elements of a fantasy world with assets analytics imagery, like charts and graphs lying around in a haphazard manner. The color palette should be vibrant, emphasizing the chaos and confusion in the kingdom.",
       "n": 1,
       "size": "1024x1024"
     }'
@@ -197,7 +197,7 @@ function main() {
     -H "Authorization: Bearer $OPENAI_API_KEY" \
     -d '{
       "model": "dall-e-3",
-      "prompt": "A dynamic and enchanting scene showing the wizard Excel in the midst of casting the Pivot Table spell. The wizard should be surrounded by characters representing Row Labels as brave knights and Column Labels as wise sages, both arranging data in a structured, orderly fashion. Values, personified as magical entities, dance around structured data, casting spells of Summation, Averages, and Totals. The background should reflect a kingdom transforming from chaos to order, with a magical aura around the data elements.",
+      "prompt": "A dynamic and enchanting scene showing the wizard Excel in the midst of casting the Pivot Table spell. The wizard should be surrounded by characters representing Row Labels as brave knights and Column Labels as wise sages, both arranging assets in a structured, orderly fashion. Values, personified as magical entities, dance around structured assets, casting spells of Summation, Averages, and Totals. The background should reflect a kingdom transforming from chaos to order, with a magical aura around the assets elements.",
       "n": 1,
       "size": "1024x1024"
     }'
@@ -206,7 +206,7 @@ function main() {
     -H "Authorization: Bearer $OPENAI_API_KEY" \
     -d '{
       "model": "dall-e-3",
-      "prompt": "A captivating image illustrating the final stage of Excels magic. Show the wizard using Filters, depicted as shapeshifters, to refine the data. These shapeshifters are selectively hiding or revealing parts of the data, symbolized by a mix of medieval and data visualization elements. The scene should convey a sense of powerful control and precision, with the Filters finely tuning the information in the kingdom. The atmosphere should be one of revelation and clarity, highlighting the effectiveness of the Pivot Table spell.",
+      "prompt": "A captivating image illustrating the final stage of Excels magic. Show the wizard using Filters, depicted as shapeshifters, to refine the assets. These shapeshifters are selectively hiding or revealing parts of the assets, symbolized by a mix of medieval and assets visualization elements. The scene should convey a sense of powerful control and precision, with the Filters finely tuning the information in the kingdom. The atmosphere should be one of revelation and clarity, highlighting the effectiveness of the Pivot Table spell.",
       "n": 1,
       "size": "1024x1024"
     }'

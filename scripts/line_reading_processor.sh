@@ -261,7 +261,7 @@ function main() {
         local formatted_line_index=$(printf "%0${leading_zeros_for_numbers}d" "$line_index")
         local formatted_line_read_speed=$(echo "$line_read_speed")
 
-        audio_filename="${input_file_output_dir}/line-${formatted_line_index}-${sanitized_character_name}-char-line-${formatted_character_line_index}-line-read-speed-${formatted_line_read_speed}.mp3"
+        audio_filename="${input_file_output_dir}/line-${formatted_line_index}-${sanitized_character_name}-char-line-${formatted_character_line_index}-speed-${formatted_line_read_speed}.mp3"
         if [[ ! -f "$audio_filename" ]]; then
             convert_line_to_audio "$line" "$voice_actor" "$line_read_speed" "$audio_filename"
         fi
