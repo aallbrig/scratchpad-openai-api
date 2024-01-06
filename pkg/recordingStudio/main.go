@@ -15,6 +15,11 @@ import (
 
 var LineReadingSchemaJson string
 
+const (
+	defaultVoiceActor    = "fable"
+	defaultLineReadSpeed = 1.0
+)
+
 type LineReadingInput struct {
 	InputFiles   []string
 	fileToScript map[string]LineReadingScript
@@ -92,6 +97,7 @@ func (lri *LineReadingInput) AddInputFile(inputFilePath string) error {
 	if err != nil {
 		return err
 	}
+	filename := filepath.Base(absInputFilePath)
 	fileBytes, err := lri.validateInputFile(absInputFilePath)
 	if err != nil {
 		return err
@@ -101,6 +107,7 @@ func (lri *LineReadingInput) AddInputFile(inputFilePath string) error {
 	if err := json.Unmarshal(fileBytes, &lineReadingScript); err != nil {
 		return err
 	}
+	lineReadingScript.file = filename
 	for i, line := range lineReadingScript.Lines {
 		if line.LineReadSpeed == 0 {
 			lineReadingScript.Lines[i].LineReadSpeed = defaultLineReadSpeed
@@ -115,7 +122,7 @@ func (lri *LineReadingInput) AddInputFile(inputFilePath string) error {
 	if lri.fileToScript == nil {
 		lri.fileToScript = make(map[string]LineReadingScript)
 	}
-	lri.fileToScript[inputFilePath] = lineReadingScript
+	lri.fileToScript[absInputFilePath] = lineReadingScript
 
 	lri.InputFiles = append(lri.InputFiles, absInputFilePath)
 	return nil
@@ -140,6 +147,7 @@ type LineReadingScript struct {
 	DefaultOverrides         DefaultOverrides `json:"default_overrides"`
 	Characters               []Character      `json:"characters"`
 	Lines                    []Line           `json:"lines"`
+	file                     string
 	characterNameToCharacter map[string]Character
 }
 
@@ -204,7 +212,11 @@ func (s *LineReadingScript) CreateLineReadRecordings(output LineReadingOutput) e
 			return err
 		}
 		audioFilename := fmt.Sprintf("line-%d-char-%s.mp3", i+1, strings.ReplaceAll(character.CharacterName, " ", "_"))
-		audioFilepath := filepath.Join(outputPath, audioFilename)
+		audioFilepath := filepath.Join(outputPath, strings.TrimSuffix(s.file, filepath.Ext(s.file)), audioFilename)
+		err = os.MkdirAll(filepath.Dir(audioFilepath), os.ModePerm)
+		if err != nil {
+			return err
+		}
 		fmt.Println(fmt.Sprintf("[info] line %v (%s %s): %s", i+1, character.CharacterName, character.VoiceActor, line.Line))
 		if err := convertLineToAudioFile(line, *character, audioFilepath); err != nil {
 			return err
@@ -226,8 +238,3 @@ type Line struct {
 	Line          string  `json:"line"`
 	LineReadSpeed float64 `json:"line_read_speed"`
 }
-
-const (
-	defaultVoiceActor    = "fable"
-	defaultLineReadSpeed = 1.0
-)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"aicontentcreationtools/cmd"
+	"aicontentcreationtools/pkg/recordingStudio"
 	_ "embed"
 )
 
@@ -12,7 +13,7 @@ var (
 
 func init() {
 	// inject embed schema for use in cmd
-	cmd.LineReadingSchemaJson = lineReadInputSchemaJson
+	recordingStudio.LineReadingSchemaJson = lineReadInputSchemaJson
 }
 func main() {
 	cmd.Execute()
